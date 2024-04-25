@@ -1,0 +1,4 @@
+# Projekt zespołowy
+
+## TODO:
+-everything
