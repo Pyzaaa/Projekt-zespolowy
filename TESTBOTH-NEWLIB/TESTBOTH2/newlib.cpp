@@ -34,6 +34,39 @@ Sim7x00::~Sim7x00(){
 }
 
 
+
+/**************************Power on Sim7x00**************************/
+void Sim7x00::PowerOn(int PowerKey){ // tu byla redefinicja argumentu powerkey ale nie dzialala
+   uint8_t answer = 0;
+
+  Serial.begin(9600);
+
+  // checks if the module is started
+  answer = sendATcommand("AT", "OK", 2000);
+  if (answer == 0)
+  {
+    Serial.print("Starting up...\n");
+    
+    pinMode(PowerKey, OUTPUT);
+    // power on pulse
+    digitalWrite(PowerKey, HIGH);
+    delay(500);
+    digitalWrite(PowerKey, LOW);
+    
+    // waits for an answer from the module
+    while (answer == 0) {     // Send AT every two seconds and wait for the answer
+      answer = sendATcommand("AT", "OK", 2000);
+	  delay(1000);
+    }
+
+  }
+
+  delay(5000);
+
+  while ((sendATcommand("AT+CREG?", "+CREG: 0,1", 500) || sendATcommand("AT+CREG?", "+CREG: 0,5", 500)) == 0)
+    delay(500);
+}
+
 /**************************Phone Calls**************************/
 void Sim7x00::PhoneCall(const char* PhoneNumber) {
   char aux_str[30];

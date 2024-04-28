@@ -1,3 +1,7 @@
+# Windows links/shortcuts
+*.lnk
+
+
 # Compiled binary sketch files
 *.hex
 
