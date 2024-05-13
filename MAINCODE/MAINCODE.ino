@@ -30,6 +30,25 @@ String sendAT(){
   return response; // should respond with AT \n OK
 }
 
+String sendcommand(String COMMAND){
+  // Send data over Serial1
+  Serial1.println(COMMAND.c_str());
+  
+  // Wait for response
+  while (!Serial1.available()) {
+    // Wait for data to be available
+  }
+  
+  // Read response
+  String response = "";
+  while (Serial1.available()) {
+    char c = Serial1.read();
+    response += c;    
+    delay(100); // This makes it read full data correctly
+  }
+  return response;
+}
+
 void setup() {
   // Initialize Serial communication for debugging
   Serial.begin(9600); //default
@@ -54,9 +73,26 @@ void setup() {
     Serial.println("MCP2515 is offline. Check connections!");
   }
 //digitalWrite(LED_BUILTIN, HIGH); // LED doesn't turn on for some reason
+
+Serial.println("Sending command AT+CSQ:\n" + sendcommand("AT+CSQ"));
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+String userInput = "";
+Serial.println("Enter your input:");
+  while (Serial.available() == 0) {
+    // Wait for user input
+  }
+  // Read user input from Serial monitor and store it in userInput variable
+  while (Serial.available()) {
+    char c = Serial.read();
+    userInput += c;
+    delay(100);
+  }
+  
+  // Print the user input for verification
+  Serial.print("You entered: ");
+  Serial.println(userInput);  
+  Serial.println("Sending command: "+ userInput + sendcommand(userInput));
 }
