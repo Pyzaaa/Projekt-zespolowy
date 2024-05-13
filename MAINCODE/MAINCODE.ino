@@ -32,7 +32,7 @@ String sendAT(){
 
 void setup() {
   // Initialize Serial communication for debugging
-  Serial.begin(9600); //default baud rate
+  Serial.begin(9600); //default
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB
   }
@@ -42,6 +42,9 @@ void setup() {
   while (!Serial1) {
     ; // wait for serial port to connect. Needed for native USB
   }
+// Set the built-in LED pin as an output
+//pinMode(LED_BUILTIN, OUTPUT);
+
     // Check if 4G module is up
   Serial.println("Testing 4G module with AT command, Module responded with:\n" + sendAT());
     // Check if MCP2515 is still alive
@@ -50,7 +53,7 @@ void setup() {
   } else {
     Serial.println("MCP2515 is offline. Check connections!");
   }
-
+//digitalWrite(LED_BUILTIN, HIGH); // LED doesn't turn on for some reason
 }
 
 void loop() {
