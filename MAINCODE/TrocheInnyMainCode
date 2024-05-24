@@ -8,59 +8,52 @@ MCP_CAN CAN(SPI_CS_PIN);
 
 // Function to send AT command
 String sendAT() {
-    // Send data over Serial1
     Serial1.println("AT");
     
-    // Wait for response
     while (!Serial1.available()) {
         // Wait for data to be available
     }
     
-    // Read response
     String response = "";
     while (Serial1.available()) {
         char c = Serial1.read();
         response += c;    
-        delay(100); // This makes it read full data correctly
+        delay(100);
     }
-    return response; // should respond with AT \n OK
+    return response;
 }
 
 // Function to send custom command to 4G module
 String sendCommand(String COMMAND) {
-    // Send data over Serial1
     Serial1.println(COMMAND.c_str());
     
-    // Wait for response
     while (!Serial1.available()) {
         // Wait for data to be available
     }
     
-    // Read response
     String response = "";
     while (Serial1.available()) {
         char c = Serial1.read();
         response += c;    
-        delay(100); // This makes it read full data correctly
+        delay(100);
     }
     return response;
 }
 
 void setup() {
-    // Initialize Serial communication for debugging
-    Serial.begin(9600); // default
+    Serial.begin(9600);
     while (!Serial) {
         ; // wait for serial port to connect. Needed for native USB
     }
-  
+
     // Initialize Serial1 for communication with 4G module
-    Serial1.begin(115200); // 4G module uses 115200 baud rate
+    Serial1.begin(115200);
     while (!Serial1) {
         ; // wait for serial port to connect. Needed for native USB
     }
 
     // Initialize MCP2515
-    if (CAN.begin(CAN_500KBPS) == CAN_OK) {
+    if (CAN.begin(MCP_ANY, CAN_500KBPS, MCP_16MHZ) == CAN_OK) {
         Serial.println("MCP2515 Initialization OK!");
     } else {
         Serial.println("MCP2515 Initialization Failed!");
@@ -92,8 +85,8 @@ void loop() {
         CAN.readMsgBuf(&rxId, &len, rxBuf);
         
         // Display ID and data
-      //  Serial.print("ID: ");
-      //  Serial.println(rxId, HEX);
+        Serial.print("ID: ");
+        Serial.println(rxId, HEX);
         
         for (int i = 0; i < len; i++) {
             Serial.print("Data ");
@@ -102,39 +95,29 @@ void loop() {
             Serial.println(rxBuf[i], HEX);
         }
 
-        // Assign data to variables
-        // Example of assigning the first byte to a variable
         int someVariable = rxBuf[0];
-        
-        // Send the variable (optional)
-        // sendVariable(someVariable); // You can add a function to send the variable
 
-        // Sending CAN data to the server
         String postData = "{\"id\":";
         postData += rxId;
         postData += ", \"data\":";
         postData += someVariable;
         postData += "}";
 
-        // Example of sending the data to the server
         Serial.println("Sending CAN data to the server: " + postData);
         Serial.println("Server response: " + sendCommand("AT+HTTPDATA=" + postData));
     }
 
-    // Handle user input and send command to 4G module
     String userInput = "";
     Serial.println("Enter your input:");
     while (Serial.available() == 0) {
         // Wait for user input
     }
-    // Read user input from Serial monitor and store it in userInput variable
     while (Serial.available()) {
         char c = Serial.read();
         userInput += c;
         delay(100);
     }
-    
-    // Print the user input for verification
+
     Serial.print("You entered: ");
     Serial.println(userInput);  
     Serial.println("Sending command: " + userInput + sendCommand(userInput));
