@@ -39,7 +39,7 @@ Sim7x00::~Sim7x00(){
 void Sim7x00::PowerOn(int PowerKey){ // tu byla redefinicja argumentu powerkey ale nie dzialala
    uint8_t answer = 0;
 
-  Serial.begin(9600);
+  Serial1.begin(115200);
 
   // checks if the module is started
   answer = sendATcommand("AT", "OK", 2000);
@@ -71,7 +71,7 @@ void Sim7x00::PowerOn(int PowerKey){ // tu byla redefinicja argumentu powerkey a
 void Sim7x00::PhoneCall(const char* PhoneNumber) {
   char aux_str[30];
 
-//  Serial.print("Enter the phone number:");
+//  Serial1.print("Enter the phone number:");
 
 //  scanf("%s", PhoneNumber);
 
@@ -83,7 +83,7 @@ void Sim7x00::PhoneCall(const char* PhoneNumber) {
 
   delay(20000);
 
-  Serial.println("AT+CHUP");            // disconnects the existing call
+  Serial1.println("AT+CHUP");            // disconnects the existing call
   Serial.print("Call disconnected\n");
 }
 
@@ -103,8 +103,8 @@ bool Sim7x00::SendingShortMessage(const char* PhoneNumber,const char* Message){
   answer = sendATcommand(aux_string, ">", 3000);    // send the SMS number
   if (answer == 1)
   {
-      Serial.println(Message);
-      Serial.write(0x1A);
+      Serial1.println(Message);
+      Serial1.write(0x1A);
       answer = sendATcommand("", "OK", 20000);
       if (answer == 1)
       {
@@ -119,7 +119,7 @@ bool Sim7x00::SendingShortMessage(const char* PhoneNumber,const char* Message){
   }
   else
   {
- //     Serial.print(answer);
+ //     Serial1.print(answer);
       Serial.print(" error.\n");
       return false;
   }
@@ -140,12 +140,12 @@ bool Sim7x00::ReceivingShortMessage(){
   if (answer == 1)
     {
         answer = 0;
-        while(Serial.available() == 0);
+        while(Serial1.available() == 0);
         // this loop reads the data of the SMS
         do{
             // if there are data in the UART input buffer, reads it and checks for the asnwer
-            if(Serial.available() > 0){    
-                RecMessage[i] = Serial.read();
+            if(Serial1.available() > 0){    
+                RecMessage[i] = Serial1.read();
                 i++;
                 // check if the desired answer (OK) is in the response of the module
                 if (strstr(RecMessage, "OK") != NULL)    
@@ -157,14 +157,14 @@ bool Sim7x00::ReceivingShortMessage(){
         
  //       RecMessage[i] = '\0';
         
-        Serial.print(RecMessage); 
-        Serial.print("\n");      
+        Serial1.print(RecMessage); 
+        Serial1.print("\n");      
         
     }
     else
     {
-        Serial.print(answer);
-        Serial.print(" error.\n");
+        Serial1.print(answer);
+        Serial1.print(" error.\n");
     return false;
     }
 
@@ -180,7 +180,7 @@ void Sim7x00::ConfigureFTP(const char* FTPServer,const char* FTPUserName,const c
   sendATcommand("AT+CFTPMODE=1", "OK", 2000);
   sendATcommand("AT+CFTPTYPE=A", "OK", 2000);
 
-//  Serial.print(aux_str,"AT+CFTPSERV=\"%s\"", FTPServer);
+//  Serial1.print(aux_str,"AT+CFTPSERV=\"%s\"", FTPServer);
 
     sprintf(aux_str,"AT+CFTPSERV=\"%s\"", FTPServer);
     sendATcommand(aux_str, "OK", 2000);
@@ -194,7 +194,7 @@ void Sim7x00::ConfigureFTP(const char* FTPServer,const char* FTPUserName,const c
 void Sim7x00::UploadToFTP(const char* FileName){
   char aux_str[50];
 
-  Serial.print("Upload file to FTP...\n");
+  Serial1.print("Upload file to FTP...\n");
   sprintf(aux_str, "AT+CFTPPUTFILE=\"%s\",0", FileName);
   sendATcommand(aux_str, "OK", 2000);
 }
@@ -202,7 +202,7 @@ void Sim7x00::UploadToFTP(const char* FileName){
 void Sim7x00::DownloadFromFTP(const char* FileName){
   char aux_str[50];
   
-  Serial.print("Download file from FTP...\n");
+  Serial1.print("Download file from FTP...\n");
   sprintf(aux_str, "AT+CFTPGETFILE=\"%s\",0", FileName);
     sendATcommand(aux_str, "OK", 2000);
 }
@@ -227,7 +227,7 @@ bool Sim7x00::GPSPositioning(){
     memset(DdMmYy, '\0', 7);    // Initialize the string
     memset(UTCTime, '\0', 7);    // Initialize the string
 
-    Serial.print("Start GPS session...\n");
+    Serial1.print("Start GPS session...\n");
     sendATcommand("AT+CGPS=1,1", "OK", 1000);    // start GPS session, standalone mode
 
     delay(2000);
@@ -239,12 +239,12 @@ bool Sim7x00::GPSPositioning(){
         if (answer == 1)
         {
             answer = 0;
-            while(Serial.available() == 0);
+            while(Serial1.available() == 0);
             // this loop reads the data of the GPS
             do{
                 // if there are data in the UART input buffer, reads it and checks for the asnwer
-                if(Serial.available() > 0){    
-                    RecMessage[i] = Serial.read();
+                if(Serial1.available() > 0){    
+                    RecMessage[i] = Serial1.read();
                     i++;
                     // check if the desired answer (OK) is in the response of the module
                     if (strstr(RecMessage, "OK") != NULL)    
@@ -255,8 +255,8 @@ bool Sim7x00::GPSPositioning(){
             }while(answer == 0);    // Waits for the asnwer with time out
             
             RecMessage[i] = '\0';
-            Serial.print(RecMessage);
-            Serial.print("\n");
+            Serial1.print(RecMessage);
+            Serial1.print("\n");
 
             if (strstr(RecMessage, ",,,,,,,,") != NULL) 
             {
@@ -273,7 +273,7 @@ bool Sim7x00::GPSPositioning(){
         }
         else
         {
-            Serial.print("error \n");
+            Serial1.print("error \n");
             return false;
         }
         delay(2000);
@@ -282,67 +282,67 @@ bool Sim7x00::GPSPositioning(){
 
     strncpy(LatDD,RecMessage,2);
     LatDD[2] = '\0';
-//    Serial.print("LatDD:");
-//    Serial.print(LatDD);
+//    Serial1.print("LatDD:");
+//    Serial1.print(LatDD);
     
     strncpy(LatMM,RecMessage+2,9);
     LatMM[9] = '\0';
-//    Serial.print(" LatMM:");
-//    Serial.print(LatMM);
+//    Serial1.print(" LatMM:");
+//    Serial1.print(LatMM);
     
     Lat = atoi(LatDD) + (atof(LatMM)/60);
     if(RecMessage[12] == 'N')
     {
-        Serial.print("Latitude is ");    
-        Serial.print(Lat);  
-        Serial.print(" N\n");   
+        Serial1.print("Latitude is ");    
+        Serial1.print(Lat);  
+        Serial1.print(" N\n");   
       }
     else if(RecMessage[12] == 'S')
     {
-        Serial.print("Latitude is ");    
-        Serial.print(Lat);
-        Serial.print(" S\n");    
+        Serial1.print("Latitude is ");    
+        Serial1.print(Lat);
+        Serial1.print(" S\n");    
       }
     else
         return false;
 
     strncpy(LogDD,RecMessage+14,3);
     LogDD[3] = '\0';
-//    Serial.print("LogDD:");
-//    Serial.print(LogDD);
+//    Serial1.print("LogDD:");
+//    Serial1.print(LogDD);
     
     strncpy(LogMM,RecMessage+17,9);
     LogMM[9] = '\0';
-//    Serial.print("LogMM:");
-//    Serial.print(LogMM);
+//    Serial1.print("LogMM:");
+//    Serial1.print(LogMM);
     
     Log = atoi(LogDD) + (atof(LogMM)/60);
     if(RecMessage[27] == 'E')
     {
-        Serial.print("Longitude is "); 
-        Serial.print(Log);
-        Serial.print(" E\n");
+        Serial1.print("Longitude is "); 
+        Serial1.print(Log);
+        Serial1.print(" E\n");
       }
     else if(RecMessage[27] == 'W')
     {
-        Serial.print("Latitude is ");
-        Serial.print(Lat);
-        Serial.print(" W\n");      
+        Serial1.print("Latitude is ");
+        Serial1.print(Lat);
+        Serial1.print(" W\n");      
       }
     else
         return false;
 
     strncpy(DdMmYy,RecMessage+29,6);
     DdMmYy[6] = '\0';
-    Serial.print("Day Month Year is ");
-    Serial.print(DdMmYy);
-    Serial.print("\n");
+    Serial1.print("Day Month Year is ");
+    Serial1.print(DdMmYy);
+    Serial1.print("\n");
     
     strncpy(UTCTime,RecMessage+36,6);
     UTCTime[6] = '\0';
-    Serial.print("UTC time is ");
-    Serial.print(UTCTime);
-    Serial.print("\n");
+    Serial1.print("UTC time is ");
+    Serial1.print(UTCTime);
+    Serial1.print("\n");
     
     return true;
 }
@@ -350,6 +350,7 @@ bool Sim7x00::GPSPositioning(){
 /**************************Other functions**************************/
 uint8_t Sim7x00::sendATcommand(const char* ATcommand, const char* expected_answer, unsigned int timeout) {
 
+  Serial1.begin(115200);
     uint8_t x=0,  answer=0;
     char response[100];
     unsigned long previous;
@@ -358,9 +359,11 @@ uint8_t Sim7x00::sendATcommand(const char* ATcommand, const char* expected_answe
     
     delay(100);
     
-    while( Serial.available() > 0) Serial.read();    // Clean the input buffer
+    while( Serial1.available() > 0) Serial1.read();    // Clean the input buffer
     
-    Serial.println(ATcommand);    // Send the AT command 
+    Serial1.println(ATcommand);    // Send the AT command 
+    printf("sent: ");    // Send the AT command 
+    printf(ATcommand);    // Send the AT command 
 
 
     x = 0;
@@ -368,10 +371,10 @@ uint8_t Sim7x00::sendATcommand(const char* ATcommand, const char* expected_answe
 
     // this loop waits for the answer
     do{
-        if(Serial.available() != 0){    
+        if(Serial1.available() != 0){    
             // if there are data in the UART input buffer, reads it and checks for the asnwer
-            response[x] = Serial.read();      
-//            Serial.print(response[x]);
+            response[x] = Serial1.read();      
+//            Serial1.print(response[x]);
             x++;
             // check if the desired answer  is in the response of the module
             if (strstr(response, expected_answer) != NULL)    
@@ -382,7 +385,7 @@ uint8_t Sim7x00::sendATcommand(const char* ATcommand, const char* expected_answe
          // Waits for the asnwer with time out
     }while((answer == 0) && ((millis() - previous) < timeout));
     
-//    Serial.print("\n");   
+//    Serial1.print("\n");   
 
     return answer;
 }
@@ -396,9 +399,9 @@ char Sim7x00::sendATcommand2(const char* ATcommand, const char* expected_answer1
 
     delay(100);
 
-    while( Serial.available() > 0) Serial.read();    // Clean the input buffer
+    while( Serial1.available() > 0) Serial1.read();    // Clean the input buffer
 
-    Serial.println(ATcommand);    // Send the AT command 
+    Serial1.println(ATcommand);    // Send the AT command 
 
     x = 0;
     previous = millis();
@@ -406,8 +409,8 @@ char Sim7x00::sendATcommand2(const char* ATcommand, const char* expected_answer1
     // this loop waits for the answer
     do{
         // if there are data in the UART input buffer, reads it and checks for the asnwer
-        if(Serial.available() != 0){    
-            response[x] = Serial.read();
+        if(Serial1.available() != 0){    
+            response[x] = Serial1.read();
             Serial.print(response[x]);
             x++;
             // check if the desired answer 1  is in the response of the module

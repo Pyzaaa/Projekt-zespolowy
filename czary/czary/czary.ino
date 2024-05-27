@@ -11,10 +11,9 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB
   }
 }
-
-void loop() {
-  // Data to send
-  
+// declare other functions there
+String sendAT(){
+  // Data to send  
   String dataToSend = "AT";
   
   Serial.println("Sending: " + dataToSend);
@@ -33,10 +32,18 @@ void loop() {
     response += c;    
     delay(100); // This makes it read full data correctly
   }
+  response.trim(); // trim response to be in one line, doesn't work
+  return "Module responded with: \n" + response + "\nExpected response AT OK";
+}
+
+
+
+void loop() {
   
   // Print response
-  Serial.println("Response: " + response);
+  Serial.println(sendAT());
   
   // Delay before sending next data
   delay(1500); // Adjust delay as needed
 }
+

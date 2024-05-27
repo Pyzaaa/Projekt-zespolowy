@@ -4,7 +4,7 @@
 #include <SPI.h>
 #include <mcp_can.h>
 
-#include "newlib.h" // do obslugi modulu SIM
+//#include "newlib.h" // do obslugi modulu SIM
 
 
 // Define the pins used for the CAN module
@@ -23,6 +23,15 @@ uint8_t returned;
   
 void setup() {
   Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB
+  }
+  
+  // Initialize Serial1 for communication with another device
+  Serial1.begin(9600);
+  while (!Serial1) {
+    ; // wait for serial port to connect. Needed for native USB
+  }
 
     // Set the 1st pin (pin 0) as input
   pinMode(0, INPUT);
@@ -34,36 +43,26 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 
 
-  printf("Sending Short Message Test:\n");
-  sim7600.SendingShortMessage(phone_number,text_message);
+  //printf("Sending Short Message Test:\n");
+  //sim7600.SendingShortMessage(phone_number,text_message);
   
-  returned = sim7600.sendATcommand("AT+CFUN?", "OK", 1000);
-  printf("Response from AT:\n" + returned);  // to powinno cos zwrocic ale nie zwraca
+  //returned = sim7600.sendATcommand("AT", "OK", 1000);  
+  //printf("Response from AT:\n" + returned);  // to powinno cos zwrocic ale nie zwraca
 }
 
 void loop() {
 
-    int data = digitalRead(0);
-  // Print the received data to the Serial console
-  Serial.println(data);
-
-  // Check if condition is met (for example, data is HIGH)
-  if(data == 0) {
-    // If condition is met, send HIGH signal to pin 2
-    digitalWrite(2, HIGH);
-  } else {
-    // Otherwise, send LOW signal to pin 2
-    digitalWrite(2, LOW);
-  }
-
-  // Check if MCP2515 is still alive
-  if (CAN.checkError() == CAN_OK) {
-  //  Serial.println("MCP2515 is online.");
-    digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)
-  } else {
-    Serial.println("MCP2515 is offline. Check connections!");
-    digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
+  String dataToSend = "Hello, world!";
+  Serial1.println(dataToSend);    // Send the AT command 
+  Serial.println("sent: AT");    //
+  
+  // Read response
+  String response = "";
+  while (Serial1.available()) {
+    char c = Serial1.read();
+    response += c;
   }
   
+  Serial.println("Response: " + response);
   delay(1000); // Wait for 1 second before next check
 }
